@@ -2,11 +2,12 @@ import pandas as pd
 import numpy as np
 from lxml import etree
 import lxml.etree as ET     #xml processing
-import copy 
-import csv 
+import copy
+import csv
 import os
 from pandas.io import excel
 
+# sundar file
 #loading the excel file
 data_time = pd.read_excel(r'C:\Users\user\Desktop\CHALMERS\AEP project\GIDAS\Excel Files GIDAS\dynamics2021.xlsx')
 dfT = pd.DataFrame(data_time)
@@ -18,7 +19,7 @@ def caseIDcount(GIDASfile):   #finding the number of crash cases
         column = [row['CASEID'] for row in reader]
         #print(column)
     Cid = int(max(column))
-    
+
     return Cid
 
 cid = caseIDcount('dynamics2021.csv')
@@ -26,7 +27,7 @@ cid = caseIDcount('dynamics2021.csv')
 #case id startification of dataframes
 list_of_CaseDfs = [
 
-    group_df 
+    group_df
 
     for j, group_df in dfT.groupby('CASEID')
 
@@ -56,7 +57,7 @@ def buildentities(GIDASfile):   #finding and returning the number of participant
     nameofentities = []
 
     for i in range(a):
-        num = str(i+1)       
+        num = str(i+1)
         nameofentities.extend(['object_' + num])
 
     return nameofentities, a
@@ -77,10 +78,10 @@ def buildMangroups(GIDASfile):   #finding and returning the number of participan
     mangroups = []
 
     for i in range(b):
-        num = str(i+1)       
+        num = str(i+1)
         mangroups.extend(['mangroup_' + num])
 
-    return mangroups, b 
+    return mangroups, b
 
 maneuver_groups = buildMangroups('case2.csv')  #file change needed
 
@@ -89,7 +90,7 @@ maneuver_groups = buildMangroups('case2.csv')  #file change needed
 
 # Load the xosc-template-file
 parser = ET.XMLParser(remove_blank_text=True) #removes whitespace nodes between elements
-treeXosc = ET.parse('ESmini_Template.xosc', parser) 
+treeXosc = ET.parse('ESmini_Template.xosc', parser)
 rootXosc = treeXosc.getroot() #root element is the html element. This function returns root element of the tree root.
 
 def addEntitiesToXoscTemplate(rootXoscTempl, numEntities):
@@ -98,8 +99,8 @@ def addEntitiesToXoscTemplate(rootXoscTempl, numEntities):
     privateObjParent = rootXoscTempl.find(".//Actions")
     seqObjParent = rootXoscTempl.find(".//Act")
     VertexObjParent = rootXoscTempl.find(".//Polyline")
-                    
-    # We will just duplicate these to use when we add to the template (deepcopy creates new list of elements and does not make changes to the original)       
+
+    # We will just duplicate these to use when we add to the template (deepcopy creates new list of elements and does not make changes to the original)
     dupl_Object = copy.deepcopy(actObjParent.find(".//ScenarioObject"))
     dupl_Private = copy.deepcopy(privateObjParent.find(".//Private"))
     dupl_Sequence = copy.deepcopy(seqObjParent.find(".//ManeuverGroup"))
@@ -120,11 +121,11 @@ def addEntitiesToXoscTemplate(rootXoscTempl, numEntities):
 gidasent = addEntitiesToXoscTemplate(rootXosc, cases[1])
 
 
-# def getVhlTypeByEntityName(xoscIn, entityName):    
+# def getVhlTypeByEntityName(xoscIn, entityName):
 #     # A utility function that just adds some basic information to the xosc template
 
 #     try:
-#         # Fix story owner 
+#         # Fix story owner
 #         vhlType = xoscIn.find(".//Entities/ScenarioObject[@name='" + entityName + "']/Vehicle").get('vehicleCategory')
 #     except:
 #         vhlType = 'Error'
@@ -133,10 +134,10 @@ gidasent = addEntitiesToXoscTemplate(rootXosc, cases[1])
 #     return vhlType
 
 # gidasve = getVhlTypeByEntityName(rootXosc, 'Car')
-    
+
 def setEntityNameByOrder(rootXosc, nameentities): #to name the entities, actions and entity references in ascending order to be distinct
 
-    # Get all nodes for objects, inits and sequences - the now complete file (all nodes for entities just duplicated) 
+    # Get all nodes for objects, inits and sequences - the now complete file (all nodes for entities just duplicated)
     allObjects = rootXosc.findall(".//Entities/ScenarioObject")
     allInits = rootXosc.findall(".//Storyboard/Init/Actions/Private")
     allSequences = rootXosc.findall(".//Story/Act/ManeuverGroup")
@@ -150,7 +151,7 @@ def setEntityNameByOrder(rootXosc, nameentities): #to name the entities, actions
 
 def setManeuverNameByOrder(rootXosc, mangroup_n): #to name the maneuvers groups in ascending order to be distinct
 
-    # Get all nodes for objects, inits and sequences - the now complete file (all nodes for entities just duplicated) 
+    # Get all nodes for objects, inits and sequences - the now complete file (all nodes for entities just duplicated)
     allact = rootXosc.findall(".//Storyboard/Story/Act/ManeuverGroup")
 
     for i in range(0,len(mangroup_n)):
@@ -175,39 +176,39 @@ def getVhlTypeByEntityName( rootXosc,typefile):
     with open(typefile,'r') as csvfile:
         reader = csv.DictReader(csvfile)
         VehType = [row['PARTTYPE'] for row in reader]
-        
+
         #print(caseid)
         #print(VehType)
         for vehicles in VehType:
-            if vehicles == '0':            
+            if vehicles == '0':
                 vehtype.append('car')
-            if vehicles == '1':            
+            if vehicles == '1':
                 vehtype.append('pedestrian')
-            if vehicles == '2':            
+            if vehicles == '2':
                 vehtype.append('motorbike')
-            if vehicles == '3':            
+            if vehicles == '3':
                 vehtype.append('bicycle')
-            if vehicles == '4':            
+            if vehicles == '4':
                 vehtype.append('truck')
-            if vehicles == '5':            
+            if vehicles == '5':
                 vehtype.append('bus')
-            if vehicles == '6':            
+            if vehicles == '6':
                 vehtype.append('tram')
-            if vehicles == '7':            
+            if vehicles == '7':
                 vehtype.append('trailer')
         # for ind, cases in enumerate(caseid):
         # #print(ind)
         #     if cases == '2':                 # to extract for the 1st case
-        #         vehtype.append(VehType[ind])  
+        #         vehtype.append(VehType[ind])
         for cases in caseid:
             if cases != '2':            #AS WE DO NOT WANT THE VEHICLE TYPE FOR CASEID1
                vehtype.remove('car')
-    print(vehtype)      
+    print(vehtype)
     # A utility function that just adds some basic information to the xosc template
     vhlType = rootXosc.findall(".//Entities/ScenarioObject/Vehicle")
     for i in range(0,len(vehtype)):
         vhlType[i].set("vehicleCategory", vehtype[i])
-        
+
     return rootXosc
 
 completetemplate = getVhlTypeByEntityName(rootXosc,'participant_data.csv')
@@ -246,12 +247,12 @@ def getVhlParamsByEntityName( rootXosc,typefile):
     for ind, cases in enumerate(caseid):
         #print(ind)
         if cases == '1':                 # to extract for the 1st case
-            width_values.append(VehWidth[ind])             
-            length_values.append(VehLength[ind])            
-            height_values.append(VehHeight[ind]) 
-            CogX.append(cogx[ind])             
-            CogY.append(cogy[ind])            
-            CogZ.append(cogz[ind]) 
+            width_values.append(VehWidth[ind])
+            length_values.append(VehLength[ind])
+            height_values.append(VehHeight[ind])
+            CogX.append(cogx[ind])
+            CogY.append(cogy[ind])
+            CogZ.append(cogz[ind])
     #print(width_values)
 
 
@@ -274,7 +275,7 @@ def saveFilledXoscTemplateToDisc(xoscOutFileName, treeXoscTempl):
     # We use pretty_print to make it look nice...
     treeXoscTempl.write(xoscOutFileName, xml_declaration=True, pretty_print=True)
 
-    # We have to replace the top row (VTD does not like it otherwise) 
+    # We have to replace the top row (VTD does not like it otherwise)
     #addXMLheaderToXoxx(xoscOutFileName)
 
     return True
@@ -286,7 +287,7 @@ def VertexandWorldposExtract(xoscIn, nameentities, num, GIDASfile):
     zlocation = {}
     vertex = {}
     heading = {}
-    
+
     data = pd.read_csv(GIDASfile)
     df = pd.DataFrame(data)
     #print(data)
@@ -307,13 +308,13 @@ def VertexandWorldposExtract(xoscIn, nameentities, num, GIDASfile):
     # print(ylocation[0])
     # print(heading[0])
 
-    for v in range(num):   
-   
+    for v in range(num):
+
         #print(v)
         name = nameentities[v]
         #print(xlocation[v][0])
         #print(name)
-        
+
         # set the initial location
         initial = xoscIn.find(".//Actions/Private[@entityRef='" + name + "']")
         initWorldVTD = initial.find(".//WorldPosition")
@@ -321,7 +322,7 @@ def VertexandWorldposExtract(xoscIn, nameentities, num, GIDASfile):
         initWorldVTD.set('y', str(ylocation[v][0]))
         initWorldVTD.set('h', str(heading[v][0]))
         initWorldVTD.set('z', str(zlocation[v][0]))
-        
+
         sequencesElem = xoscIn.find(".//Actors/EntityRef[@entityRef='" + name + "']")
         #print(sequencesElem)
         sqepp = sequencesElem.getparent().getparent() # add sqepp
@@ -329,22 +330,22 @@ def VertexandWorldposExtract(xoscIn, nameentities, num, GIDASfile):
         vertexElem_deepCopy = copy.deepcopy(sqepp.find(".//Vertex[@time='0.0']"))
         #print(vertexElem_deepCopy)
 
-    
+
         # Remove all the vertices for this polyline
         rootPolyline= sqepp.find(".//Polyline")
         d_root = rootPolyline.getparent().remove(rootPolyline)
-      
+
         # Add it again so that we can fill it with new data
         tmpRoot = sqepp.find(".//Shape")
-        ET.SubElement(tmpRoot, 'Polyline') 
+        ET.SubElement(tmpRoot, 'Polyline')
         d_root= sqepp.find(".//Polyline")
         AddVert = len(xlocation[v])
         # print(AddVert)
-            
+
         for t in range(AddVert):
 
             vertexElem_copy = copy.deepcopy(vertexElem_deepCopy)
-            
+
             vertexElem_copy.set("time",str(vertex[v][t]))
             worldElem = vertexElem_copy.find(".//WorldPosition")
             worldElem.set("x",str(xlocation[v][t]))

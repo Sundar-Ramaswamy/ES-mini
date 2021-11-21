@@ -1,0 +1,151 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenSCENARIO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="OpenSccenario.xsd">
+	<FileHeader description="CaseNr" author="Chalmers" revMajor="1" revMinor="0" date="2021-03-10T22:51:12.464235" />
+	<ParameterDeclarations>
+		<ParameterDeclaration name="$HostVehicle" parameterType="string" value="car_white" />
+		<ParameterDeclaration name="$TargetVehicle" parameterType="string" value="car_red" />
+	</ParameterDeclarations>
+	<CatalogLocations>
+		<VehicleCatalog>
+			<Directory path="../xosc/Catalogs/Vehicles" />
+		</VehicleCatalog>
+	</CatalogLocations>
+	<RoadNetwork>
+		<LogicFile filepath="../xodr/case_123456.xodr" />
+	</RoadNetwork>
+	<Entities>
+		<ScenarioObject name="object_1">
+			<Vehicle name="vehicle_1" vehicleCategory="car">
+				<ParameterDeclarations />
+				<BoundingBox>
+					<Center x="1.5" y="0" z="0.70" />
+					<Dimensions width="1.85" length="4.7" height="1.6" />
+				</BoundingBox>
+				<Performance maxSpeed="70" maxDeceleration="10" maxAcceleration="10" />
+				<Axels>
+					<Axel maxSteering="30" wheelDiameter="0.7" trackWidth="1.9" positionX="2.7" positionZ="0.35" />
+					<Axel maxSteering="30" wheelDiameter="0.7" trackWidth="1.9" positionX="0" positionZ="0.35" />
+				</Axels>
+				<Properties>
+					<Property name="model_id" value="0" />
+					<Property name="control" value="internal" />
+					<File filepath="../models/car_white.osgb" />
+				</Properties>
+			</Vehicle>
+		</ScenarioObject>
+	</Entities>
+	<Storyboard>
+		<Init>
+			<Actions>
+				<Private entityRef="object_1">
+					<PrivateAction>
+						<TeleportAction>
+							<Position>
+								<WorldPosition x="0.0" y="0.0" h="0.0" />
+							</Position>
+						</TeleportAction>
+					</PrivateAction>
+					<PrivateAction>
+						<LongitudinalAction>
+							<SpeedAction>
+								<SpeedActionDynamics dynamicsShape="step" value="1" dynamicsDimension="time" />
+								<SpeedActionTarget>
+									<AbsoluteTargetSpeed value="0" />
+								</SpeedActionTarget>
+							</SpeedAction>
+						</LongitudinalAction>
+					</PrivateAction>
+				</Private>
+			</Actions>
+		</Init>
+		<Story name="mystory">
+			<ParameterDeclarations />
+			<Act name="my_act">
+				<ManeuverGroup name="mangroup_1" maximumExecutionCount="1">
+					<Actors selectTriggeringEntities="false">
+						<EntityRef entityRef="object_1" />
+					</Actors>
+					<Maneuver name="maneuver_1">
+						<Event name="event_follow_trajectory1" priority="overwrite" maximumExecutionCount="1">
+							<Action name="action_follow_trajectory_1">
+								<PrivateAction>
+									<RoutingAction>
+										<FollowTrajectoryAction>
+											<Trajectory name="traj_1" closed="false">
+												<ParameterDeclarations />
+												<Shape>
+													<Polyline>
+														<Vertex time="0.0">
+															<Position>
+																<WorldPosition x="0.0" y="0.0" h="0.0" />
+															</Position>
+														</Vertex>
+													</Polyline>
+												</Shape>
+											</Trajectory>
+											<TimeReference>
+												<Timing domainAbsoluteRelative="absolute" scale="1" offset="0" />
+											</TimeReference>
+											<TrajectoryFollowingMode name="position" />
+										</FollowTrajectoryAction>
+									</RoutingAction>
+								</PrivateAction>
+							</Action>
+							<StartTrigger>
+								<ConditionGroup>
+									<Condition name="starttrigger_3" delay="0.0" conditionEdge="none">
+										<ByValueCondition>
+											<SimulationTimeCondition value="0.0" rule="greaterThan" />
+										</ByValueCondition>
+									</Condition>
+								</ConditionGroup>
+							</StartTrigger>
+						</Event>
+						<Event name="event_stop_3" priority="overwrite" maximumExecutionCount="1">
+							<Action name="action_stop_3">
+								<PrivateAction>
+									<LongitudinalAction>
+										<SpeedAction>
+											<SpeedActionDynamics dynamicsShape="step" value="0" dynamicsDimension="time" />
+											<SpeedActionTarget>
+												<AbsoluteTargetSpeed value="0" />
+											</SpeedActionTarget>
+										</SpeedAction>
+									</LongitudinalAction>
+								</PrivateAction>
+							</Action>
+							<StartTrigger>
+								<ConditionGroup>
+									<Condition name="starttrigger2_3" delay="0.0" conditionEdge="none">
+										<ByValueCondition>
+											<StoryboardElementStateCondition storyboardElementType="event" storyboardElementRef="event_follow_trajectory1" state="endTransition" />
+										</ByValueCondition>
+									</Condition>
+								</ConditionGroup>
+							</StartTrigger>
+						</Event>
+					</Maneuver>
+				</ManeuverGroup>
+				<StartTrigger>
+					<ConditionGroup>
+						<Condition name="actstarttrigger" delay="0" conditionEdge="rising">
+							<ByValueCondition>
+								<SimulationTimeCondition value="0" rule="greaterThan" />
+							</ByValueCondition>
+						</Condition>
+					</ConditionGroup>
+				</StartTrigger>
+				<StopTrigger>
+					<ConditionGroup>
+						<Condition name="actstoptrigger" delay="0" conditionEdge="rising">
+							<ByValueCondition>
+								<SimulationTimeCondition value="25" rule="greaterThan" />
+							</ByValueCondition>
+						</Condition>
+					</ConditionGroup>
+				</StopTrigger>
+			</Act>
+		</Story>
+		<StopTrigger />
+	</Storyboard>
+</OpenSCENARIO>
